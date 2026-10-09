@@ -1,13 +1,26 @@
+import { Suspense } from "react";
+import Banner from "./components/banner";
+import ProductSections from "./components/product-sections";
+import { getProducts } from "./lib/products";
 
-import Navbar from "./components/navbar";
+async function ProductListing() {
+  const products = await getProducts();
+  return <ProductSections products={products} />;
+}
 
-const page = () => {
+export default function Page() {
   return (
-    <>
-      <Navbar />
-      <main>Home Page</main>
-    </>
+    <main className="mx-auto w-full max-w-6xl px-4 pb-12">
+      <Banner />
+      <Suspense
+        fallback={
+          <div aria-live="polite" className="py-8 text-center text-sm text-bazaar-muted">
+            পণ্যের তথ্য লোড হচ্ছে…
+          </div>
+        }
+      >
+        <ProductListing />
+      </Suspense>
+    </main>
   );
-};
-
-export default page;
+}

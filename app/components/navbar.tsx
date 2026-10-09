@@ -2,9 +2,20 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import styles from "./navbar.module.css";
+import { Store } from "lucide-react";
+import { authClient } from "../lib/auth-client";
+import { useToast } from "./toast-provider";
 
-const categories = ["সব পণ্য", "শাকসবজি", "ফলমূল", "মাছ ও মাংস", "মুদি পণ্য"];
+const categories = [
+  { name: "চাল", emoji: "🍚" },
+  { name: "মাছ", emoji: "🐟" },
+  { name: "মাংস", emoji: "🍗" },
+  { name: "শাকসবজি", emoji: "🥬" },
+  { name: "ফলমূল", emoji: "🍎" },
+  { name: "দুধ ও ডিম", emoji: "🥚" },
+  { name: "মুদি-পণ্য", emoji: "🛒" },
+  { name: "মসলা", emoji: "🌶️" },
+];
 
 const banglaDateFormatter = new Intl.DateTimeFormat("bn-BD", {
   weekday: "long",
@@ -23,28 +34,25 @@ const marketPrices = [
   { emoji: "🐟", name: "রুই মাছ", price: "৳৩৫০", unit: "কেজি", trend: "down", change: "০.৬%" },
 ];
 
-type NavbarUser = { name: string };
-
-type NavbarProps =
-  | { user?: null }
-  | { user: NavbarUser; onSignOut: () => void };
-
 function PriceItems() {
   return marketPrices.map((item) => (
-    <span className={styles.priceItem} key={item.name}>
-      <span aria-hidden="true" className={styles.priceEmoji}>{item.emoji}</span>
-      <span className={styles.priceName}>{item.name}</span>
-      <span className={styles.priceValue}>{item.price}/{item.unit}</span>
-      <span className={item.trend === "up" ? styles.priceUp : styles.priceDown}>
+    <span className="inline-flex shrink-0 items-center gap-1.5 border-r border-[#e0e8e2] px-3 text-[9px] whitespace-nowrap" key={item.name}>
+      <span aria-hidden="true" className="text-[11px]">{item.emoji}</span>
+      <span>{item.name}</span>
+      <span>{item.price}/{item.unit}</span>
+      <span className={item.trend === "up" ? "font-bold text-bazaar-green" : "font-bold text-[#d9433e]"}>
         <span aria-hidden="true">{item.trend === "up" ? "▲" : "▼"}</span> {item.change}
       </span>
     </span>
   ));
 }
 
-export default function Navbar(props: NavbarProps = {}) {
-  const [activeCategory, setActiveCategory] = useState(categories[0]);
+export default function Navbar() {
+  const [activeCategory, setActiveCategory] = useState(categories[0].name);
   const [banglaDate, setBanglaDate] = useState("");
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { data: session, isPending } = authClient.useSession();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(
@@ -56,56 +64,83 @@ export default function Navbar(props: NavbarProps = {}) {
   }, []);
 
   return (
-    <header className={styles.header}>
-      <div className={styles.headerInner}>
-        <div className={styles.topRow}>
-          <div className={styles.brandBlock}>
-            <Link aria-label="বাজার দর হোম" className={styles.brand} href="/">
-              <span aria-hidden="true" className={styles.brandIcon}>🛒</span>
+    <header className="w-full border-b border-[#e7ede9] bg-bazaar-surface text-bazaar-ink">
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <div className="flex min-h-[42px] items-center justify-between gap-4 border-b border-[#edf1ee]">
+          <div className="flex flex-col items-start">
+            <Link aria-label="বাজার দর হোম" className="inline-flex items-center gap-1.5 text-[13px] font-extrabold text-[#17251d] no-underline" href="/">
+              <span aria-hidden="true" className="grid size-6 place-items-center rounded-[7px] bg-bazaar-green text-white">
+                <Store aria-hidden="true" size={14} strokeWidth={2} />
+              </span>
               <span>বাজার দর</span>
             </Link>
-            <p className={styles.date}>{banglaDate}</p>
+            <p className="mb-0 ml-[29px] text-[8px] text-[#727c75]">{banglaDate}</p>
           </div>
 
-          {"user" in props && props.user ? (
-            <div className={styles.accountActions}>
-              <Link className={styles.profileLink} href="/profile">
-                <span aria-hidden="true" className={styles.avatar}>
-                  {props.user.name.slice(0, 1)}
+          {isPending ? (
+            <div aria-label="অ্যাকাউন্ট লোড হচ্ছে" className="flex items-center gap-2.5">
+              <span className="h-7 w-14 animate-pulse rounded bg-[#e8eee9]" />
+              <span className="h-7 w-16 animate-pulse rounded bg-[#d9eee0]" />
+            </div>
+          ) : session?.user ? (
+            <div className="flex items-center justify-end gap-2.5">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#294638]">
+                <span aria-hidden="true" className="grid size-6 place-items-center rounded-full bg-[#e6f2e9] text-[#176c45]">
+                  {session.user.name.slice(0, 1)}
                 </span>
-                <span>{props.user.name}</span>
-              </Link>
-              <button className={styles.signOutButton} onClick={props.onSignOut} type="button">
-                সাইন আউট
+                <span>{session.user.name}</span>
+              </span>
+              <button
+                className="inline-flex min-h-7 items-center justify-center rounded-md border-0 bg-transparent px-2.5 text-[10px] font-bold text-bazaar-ink hover:text-bazaar-green disabled:opacity-60"
+                disabled={isSigningOut}
+                onClick={async () => {
+                  setIsSigningOut(true);
+                  try {
+                    const result = await authClient.signOut();
+                    if (result.error) throw new Error(result.error.message);
+                    showToast("সফলভাবে সাইন আউট হয়েছে।");
+                  } catch (error) {
+                    showToast(
+                      error instanceof Error ? error.message : "সাইন আউট করা যায়নি।",
+                      "error",
+                    );
+                  } finally {
+                    setIsSigningOut(false);
+                  }
+                }}
+                type="button"
+              >
+                {isSigningOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
               </button>
             </div>
           ) : (
-            <div className={styles.accountActions}>
-              <Link className={styles.signInButton} href="/sign-in">সাইন ইন</Link>
-              <Link className={styles.signUpButton} href="/sign-up">সাইন আপ</Link>
+            <div className="flex items-center justify-end gap-2.5">
+              <Link className="inline-flex min-h-7 items-center justify-center rounded-md px-2.5 text-[10px] font-bold text-bazaar-ink no-underline hover:text-bazaar-green" href="/signin">সাইন ইন</Link>
+              <Link className="inline-flex min-h-7 items-center justify-center rounded-md border border-bazaar-green bg-bazaar-green px-2.5 text-[10px] font-bold text-white no-underline hover:bg-bazaar-green-dark" href="/signup">সাইন আপ</Link>
             </div>
           )}
         </div>
 
-        <nav aria-label="পণ্যের বিভাগ" className={styles.categoryNav}>
+        <nav aria-label="পণ্যের বিভাগ" className="flex min-h-[30px] items-center justify-start gap-[clamp(10px,2vw,22px)] overflow-x-auto sm:justify-center">
           {categories.map((category) => (
             <button
-              aria-current={activeCategory === category ? "page" : undefined}
-              className={`${styles.categoryLink} ${activeCategory === category ? styles.activeCategory : ""}`}
-              key={category}
-              onClick={() => setActiveCategory(category)}
+              aria-current={activeCategory === category.name ? "page" : undefined}
+              className={`inline-flex shrink-0 items-center gap-1 border-0 bg-transparent p-[3px] text-[10px] text-[#48564d] hover:text-bazaar-green ${activeCategory === category.name ? "font-extrabold text-bazaar-green" : ""}`}
+              key={category.name}
+              onClick={() => setActiveCategory(category.name)}
               type="button"
             >
-              {category}
+              <span aria-hidden="true" className="text-[10px]">{category.emoji}</span>
+              {category.name}
             </button>
           ))}
         </nav>
       </div>
 
-      <div aria-label="বাজারদরের নমুনা মূল্য" className={styles.ticker}>
-        <div className={styles.tickerTrack}>
-          <div className={styles.tickerGroup}><PriceItems /></div>
-          <div aria-hidden="true" className={styles.tickerGroup}><PriceItems /></div>
+      <div aria-label="বাজারদরের নমুনা মূল্য" className="flex min-h-8 items-center overflow-hidden border-y border-[#e8eeea] bg-[#f7faf8]">
+        <div className="flex w-max animate-bazaar-ticker hover:[animation-play-state:paused]">
+          <div className="flex shrink-0 items-center"><PriceItems /></div>
+          <div aria-hidden="true" className="flex shrink-0 items-center"><PriceItems /></div>
         </div>
       </div>
     </header>

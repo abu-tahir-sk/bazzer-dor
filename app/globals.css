@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+  --font-bengali: var(--font-noto-sans-bengali), var(--font-geist-sans), sans-serif;
+  --color-bazaar-green: #16834e;
+  --color-bazaar-green-dark: #116f3c;
+  --color-bazaar-ink: #26352c;
+  --color-bazaar-muted: #68756d;
+  --color-bazaar-border: #e1e9e2;
+  --color-bazaar-surface: #fbfdfb;
+  --animate-bazaar-ticker: bazaar-ticker-scroll 42s linear infinite;
+
+  @keyframes bazaar-ticker-scroll {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
