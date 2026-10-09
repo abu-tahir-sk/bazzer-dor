@@ -34,9 +34,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="bn"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansBengali.variable} ${notoSerifBengali.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-[#f7faf7] font-bengali text-bazaar-ink">
+      <body
+        className="min-h-screen flex flex-col bg-[#f7faf7] font-bengali text-bazaar-ink"
+        suppressHydrationWarning
+      >
         <ToastProvider>
           <Navbar />
           <div className="flex-grow">{children}</div>

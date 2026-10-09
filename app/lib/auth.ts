@@ -1,19 +1,9 @@
 import "server-only";
 
-import { mkdirSync } from "node:fs";
-import { resolve } from "node:path";
-import Database from "better-sqlite3";
+import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { betterAuth } from "better-auth";
 import type { BetterAuthOptions } from "better-auth";
-import { Pool } from "pg";
-
-const databaseDirectory = resolve(process.cwd(), ".data");
-const database = process.env.DATABASE_URL
-  ? new Pool({ connectionString: process.env.DATABASE_URL })
-  : (() => {
-      mkdirSync(databaseDirectory, { recursive: true });
-      return new Database(resolve(databaseDirectory, "bazaar-auth.sqlite"));
-    })();
+import { authDb } from "./mongodb";
 
 const socialProviders: NonNullable<BetterAuthOptions["socialProviders"]> = {};
 
@@ -37,7 +27,7 @@ export const auth = betterAuth({
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "bazaar-dor-development-only-secret-do-not-use-in-production",
-  database,
+  database: mongodbAdapter(authDb),
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
@@ -50,7 +40,10 @@ export function assertAuthConfiguration() {
   if (process.env.NODE_ENV === "production" && !process.env.BETTER_AUTH_SECRET) {
     throw new Error("BETTER_AUTH_SECRET must be set before enabling authentication in production.");
   }
-  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL must point to persistent PostgreSQL storage in production.");
+  if (process.env.NODE_ENV === "production" && !process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI must point to a persistent MongoDB database in production.");
+  }
+  if (process.env.NODE_ENV === "production" && !process.env.MONGODB_AUTH_DB) {
+    throw new Error("MONGODB_AUTH_DB must be set so auth data is isolated from app data.");
   }
 }
