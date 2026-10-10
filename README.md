@@ -1,6 +1,6 @@
-#  BazarDor
+# BazarDor
 
-বাজার দর (BazarDor) is a modern, responsive web application that tracks and displays real-time market prices of daily essential commodities. Built for a seamless user experience, it helps users make informed purchasing decisions.
+(BazarDor) is a modern, responsive web application that tracks and displays real-time market prices of daily essential commodities. Built for a seamless user experience, it helps users make informed purchasing decisions.
 
 ##  Technologies Used
 - **Next.js (App Router)** - Framework for building the UI and handling routing.
@@ -21,5 +21,4 @@
 1. Clone the repository.
 2. Install dependencies using `npm install`.
 3. Configure environment variables in `.env.local` for Database URI, BetterAuth settings, and OAuth Client ID/Secrets.
-4. Run the development server with `npm run dev`.
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
