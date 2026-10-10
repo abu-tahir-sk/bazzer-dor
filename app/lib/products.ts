@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api.api-store.workers.dev/api/bazardor";
+const API_BASE_URL = "https://openapi.programming-hero.com/api/bazardor";
 
 export type PriceDirection = "up" | "down" | "flat";
 export type ProductUnit = "kg" | "litre" | "dozen" | "piece";
