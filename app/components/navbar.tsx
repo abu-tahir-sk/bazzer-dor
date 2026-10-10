@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Store } from "lucide-react";
 import { authClient } from "../lib/auth-client";
@@ -52,8 +52,20 @@ export default function Navbar() {
   const pathname = usePathname();
   const [banglaDate, setBanglaDate] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { data: session, isPending } = authClient.useSession();
   const { showToast } = useToast();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(
@@ -84,8 +96,11 @@ export default function Navbar() {
               <span className="h-7 w-16 animate-pulse rounded bg-[#d9eee0]" />
             </div>
           ) : session?.user ? (
-            <div className="flex items-center justify-end gap-2.5">
-              <Link className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#294638] no-underline hover:text-bazaar-green" href="/profile">
+            <div className="relative flex items-center justify-end" ref={dropdownRef}>
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#294638] hover:text-bazaar-green border-0 bg-transparent cursor-pointer"
+              >
                 {session.user.image ? (
                   <img src={session.user.image} alt="" className="size-6 rounded-full object-cover" />
                 ) : (
@@ -94,29 +109,49 @@ export default function Navbar() {
                   </span>
                 )}
                 <span>{session.user.name || "ব্যবহারকারী"}</span>
-              </Link>
-              <button
-                className="inline-flex min-h-7 items-center justify-center rounded-md border-0 bg-transparent px-2.5 text-[10px] font-bold text-bazaar-ink hover:text-bazaar-green disabled:opacity-60"
-                disabled={isSigningOut}
-                onClick={async () => {
-                  setIsSigningOut(true);
-                  try {
-                    const result = await authClient.signOut();
-                    if (result.error) throw new Error(result.error.message);
-                    showToast("সফলভাবে সাইন আউট হয়েছে।");
-                  } catch (error) {
-                    showToast(
-                      error instanceof Error ? error.message : "সাইন আউট করা যায়নি।",
-                      "error",
-                    );
-                  } finally {
-                    setIsSigningOut(false);
-                  }
-                }}
-                type="button"
-              >
-                {isSigningOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
+                <span className="text-[8px] opacity-60">▼</span>
               </button>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-bazaar-border bg-white p-3 shadow-lg z-50">
+                  <div className="border-b border-[#edf1ed] pb-2 mb-2">
+                    <p className="m-0 text-sm font-bold text-[#203d2b]">{session.user.name || "ব্যবহারকারী"}</p>
+                    <p className="m-0 text-[10px] text-bazaar-muted truncate">{session.user.email}</p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Link 
+                      href="/profile" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="inline-flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold text-[#34443a] hover:bg-[#f4f8f4] hover:text-bazaar-green no-underline"
+                    >
+                      <span aria-hidden="true" className="opacity-70">👤</span> আমার প্রোফাইল
+                    </Link>
+                    <button
+                      className="inline-flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold text-[#d9433e] hover:bg-[#fff0ef] border-0 bg-transparent text-left disabled:opacity-60 cursor-pointer"
+                      disabled={isSigningOut}
+                      onClick={async () => {
+                        setIsDropdownOpen(false);
+                        setIsSigningOut(true);
+                        try {
+                          const result = await authClient.signOut();
+                          if (result.error) throw new Error(result.error.message);
+                          showToast("সফলভাবে সাইন আউট হয়েছে।");
+                        } catch (error) {
+                          showToast(
+                            error instanceof Error ? error.message : "সাইন আউট করা যায়নি।",
+                            "error",
+                          );
+                        } finally {
+                          setIsSigningOut(false);
+                        }
+                      }}
+                      type="button"
+                    >
+                      <span aria-hidden="true" className="opacity-70">↩️</span> {isSigningOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center justify-end gap-2.5">
