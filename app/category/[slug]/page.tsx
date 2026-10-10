@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getProductsByCategory } from "../../lib/products";
+import { getProductsByCategory, type Product } from "../../lib/products";
 import { CategoryClient } from "./category-client";
 import { ProductGridSkeleton } from "../../components/product-skeleton";
 
@@ -17,26 +17,27 @@ const categoryMeta: Record<string, { name: string; emoji: string }> = {
 };
 
 async function CategoryProducts({ slug }: { slug: string }) {
+  let products: Product[] = [];
+  let meta = categoryMeta[slug] || { name: "পণ্য", emoji: "🛍️" };
+  
   try {
-    const products = await getProductsByCategory(slug);
-    const meta = categoryMeta[slug] || { name: "পণ্য", emoji: "🛍️" };
-
-    if (products.length === 0) {
-      return <CategoryClient products={[]} categoryName={meta.name} categoryIcon={meta.emoji} />;
-    }
-
-    // Overwrite meta with actual data from first product if available, as a fallback
-    const actualMeta = {
-      name: categoryMeta[slug] ? categoryMeta[slug].name : products[0].categoryNameBn,
-      emoji: categoryMeta[slug] ? categoryMeta[slug].emoji : products[0].categoryIcon,
-    };
-
-    return <CategoryClient products={products} categoryName={actualMeta.name} categoryIcon={actualMeta.emoji} />;
+    products = await getProductsByCategory(slug);
   } catch (error) {
     // If API throws an error (e.g. invalid category slug leading to 404), show Empty State / 404
-    const meta = categoryMeta[slug] || { name: "অজানা বিভাগ", emoji: "❓" };
+    meta = categoryMeta[slug] || { name: "অজানা বিভাগ", emoji: "❓" };
+  }
+
+  if (products.length === 0) {
     return <CategoryClient products={[]} categoryName={meta.name} categoryIcon={meta.emoji} />;
   }
+
+  // Overwrite meta with actual data from first product if available, as a fallback
+  const actualMeta = {
+    name: categoryMeta[slug] ? categoryMeta[slug].name : products[0].categoryNameBn,
+    emoji: categoryMeta[slug] ? categoryMeta[slug].emoji : products[0].categoryIcon,
+  };
+
+  return <CategoryClient products={products} categoryName={actualMeta.name} categoryIcon={actualMeta.emoji} />;
 }
 
 async function CategoryContent({ params }: { params: Promise<{ slug: string }> }) {
