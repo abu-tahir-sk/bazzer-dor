@@ -62,9 +62,14 @@ function isProduct(value: unknown): value is Product {
 }
 
 async function fetchProductResponse(url: string): Promise<unknown> {
-  const response = await fetch(url, { cache: "no-store" });
+  // Using cache to avoid rate limits (revalidate every 60 seconds)
+  const response = await fetch(url, { next: { revalidate: 60 } });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      console.warn(`Rate limit exceeded (429) for ${url}. Returning empty data.`);
+      return [];
+    }
     throw new Error(`Product API request failed (${response.status}): ${url}`);
   }
 
@@ -95,8 +100,13 @@ export async function getProductsByCategory(category: string): Promise<Product[]
 export async function getProductById(id: number): Promise<Product | null> {
   const url = `${API_BASE_URL}/products/${encodeURIComponent(id)}`;
 
-  const response = await fetch(url, { cache: "no-store" });
+  // Using cache to avoid rate limits (revalidate every 60 seconds)
+  const response = await fetch(url, { next: { revalidate: 60 } });
   if (response.status === 404) {
+    return null;
+  }
+  if (response.status === 429) {
+    console.warn(`Rate limit exceeded (429) for ${url}. Returning null.`);
     return null;
   }
   if (!response.ok) {
