@@ -24,7 +24,8 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
 
 export const auth = betterAuth({
   appName: "বাজার দর",
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
+  trustedOrigins: process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`, process.env.BETTER_AUTH_URL].filter(Boolean) as string[] : undefined,
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "bazaar-dor-development-only-secret-do-not-use-in-production",

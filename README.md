@@ -16,9 +16,3 @@
 3. **Comprehensive Market Comparison:** Product detail pages show minimum, maximum, and average prices across different divisions and markets, as well as historical prices (yesterday, last week, last month).
 4. **Secure Authentication:** Users can securely sign up or log in using email/password, Google, or GitHub via BetterAuth. Certain routes (like product details) are protected for logged-in users only.
 5. **Profile Management:** Users can view their profile and update their personal information seamlessly.
-
-##  Setup & Installation
-1. Clone the repository.
-2. Install dependencies using `npm install`.
-3. Configure environment variables in `.env.local` for Database URI, BetterAuth settings, and OAuth Client ID/Secrets.
-
