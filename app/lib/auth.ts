@@ -4,6 +4,7 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { betterAuth } from "better-auth";
 import type { BetterAuthOptions } from "better-auth";
 import { authDb } from "./mongodb";
+import { nextCookies } from "better-auth/next-js";
 
 const socialProviders: NonNullable<BetterAuthOptions["socialProviders"]> = {};
 
@@ -34,6 +35,7 @@ export const auth = betterAuth({
     minPasswordLength: 8,
   },
   socialProviders,
+  plugins: [nextCookies()],
 });
 
 export function assertAuthConfiguration() {

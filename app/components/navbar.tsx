@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Store } from "lucide-react";
 import { authClient } from "../lib/auth-client";
+import { usePathname } from "next/navigation";
 import { useToast } from "./toast-provider";
 
 const categories = [
-  { name: "চাল", emoji: "🍚" },
-  { name: "মাছ", emoji: "🐟" },
-  { name: "মাংস", emoji: "🍗" },
-  { name: "শাকসবজি", emoji: "🥬" },
-  { name: "ফলমূল", emoji: "🍎" },
-  { name: "দুধ ও ডিম", emoji: "🥚" },
-  { name: "মুদি-পণ্য", emoji: "🛒" },
-  { name: "মসলা", emoji: "🌶️" },
+  { name: "চাল", slug: "chal", emoji: "🍚" },
+  { name: "ডাল", slug: "dal", emoji: "🫘" },
+  { name: "তেল", slug: "tel", emoji: "🫙" },
+  { name: "সবজি", slug: "sobji", emoji: "🥬" },
+  { name: "মাছ", slug: "mach", emoji: "🐟" },
+  { name: "মাংস", slug: "mangsho", emoji: "🍗" },
+  { name: "ডিম ও দুধ", slug: "dim-dui", emoji: "🥚" },
+  { name: "মসলা", slug: "mosla", emoji: "🌶️" },
 ];
 
 const banglaDateFormatter = new Intl.DateTimeFormat("bn-BD", {
@@ -48,7 +49,7 @@ function PriceItems() {
 }
 
 export default function Navbar() {
-  const [activeCategory, setActiveCategory] = useState(categories[0].name);
+  const pathname = usePathname();
   const [banglaDate, setBanglaDate] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
   const { data: session, isPending } = authClient.useSession();
@@ -84,12 +85,12 @@ export default function Navbar() {
             </div>
           ) : session?.user ? (
             <div className="flex items-center justify-end gap-2.5">
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#294638]">
+              <Link className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#294638] no-underline hover:text-bazaar-green" href="/profile">
                 <span aria-hidden="true" className="grid size-6 place-items-center rounded-full bg-[#e6f2e9] text-[#176c45]">
                   {session.user.name.slice(0, 1)}
                 </span>
                 <span>{session.user.name}</span>
-              </span>
+              </Link>
               <button
                 className="inline-flex min-h-7 items-center justify-center rounded-md border-0 bg-transparent px-2.5 text-[10px] font-bold text-bazaar-ink hover:text-bazaar-green disabled:opacity-60"
                 disabled={isSigningOut}
@@ -122,18 +123,20 @@ export default function Navbar() {
         </div>
 
         <nav aria-label="পণ্যের বিভাগ" className="flex min-h-[30px] items-center justify-start gap-[clamp(10px,2vw,22px)] overflow-x-auto sm:justify-center">
-          {categories.map((category) => (
-            <button
-              aria-current={activeCategory === category.name ? "page" : undefined}
-              className={`inline-flex shrink-0 items-center gap-1 border-0 bg-transparent p-[3px] text-[10px] text-[#48564d] hover:text-bazaar-green ${activeCategory === category.name ? "font-extrabold text-bazaar-green" : ""}`}
-              key={category.name}
-              onClick={() => setActiveCategory(category.name)}
-              type="button"
-            >
-              <span aria-hidden="true" className="text-[10px]">{category.emoji}</span>
-              {category.name}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const isActive = pathname === `/category/${category.slug}`;
+            return (
+              <Link
+                aria-current={isActive ? "page" : undefined}
+                className={`inline-flex shrink-0 items-center gap-1 border-0 bg-transparent p-[3px] text-[10px] text-[#48564d] no-underline hover:text-bazaar-green ${isActive ? "font-extrabold text-bazaar-green" : ""}`}
+                href={`/category/${category.slug}`}
+                key={category.slug}
+              >
+                <span aria-hidden="true" className="text-[10px]">{category.emoji}</span>
+                {category.name}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 

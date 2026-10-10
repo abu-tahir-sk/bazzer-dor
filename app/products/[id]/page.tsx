@@ -1,12 +1,16 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { auth } from "../../lib/auth";
 import {
   formatBengaliNumber,
   formatBengaliPercentage,
   getProductById,
   productUnitLabels,
 } from "../../lib/products";
+
+export const instant = false;
 
 async function ProductDetail({
   params,
@@ -15,6 +19,14 @@ async function ProductDetail({
 }) {
   const { id: rawId } = await params;
   const id = Number(rawId);
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/signin?error=protected");
+  }
 
   if (!Number.isInteger(id) || id < 1) {
     notFound();

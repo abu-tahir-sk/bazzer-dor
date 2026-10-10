@@ -6,7 +6,7 @@ import {
   type Product,
 } from "../lib/products";
 
-function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product }: { product: Product }) {
   const directionLabel =
     product.change.dir === "up"
       ? "দাম বেড়েছে"

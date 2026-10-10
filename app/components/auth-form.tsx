@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "../lib/auth-client";
 import { AUTH_TOAST_STORAGE_KEY } from "../lib/auth-toast";
 import { useToast } from "./toast-provider";
@@ -24,9 +25,20 @@ export default function AuthForm({
   githubEnabled,
 }: AuthFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // Check for redirect errors
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "protected") {
+      showToast("এই পেজটি দেখতে লগইন করুন।", "error");
+      // Remove param from url silently
+      router.replace("/signin");
+    }
+  }, [searchParams, router, showToast]);
   const lastValidationToast = useRef(0);
   const isSignup = mode === "signup";
   const emailInputId = isSignup ? "signup-email" : "signin-email";

@@ -81,6 +81,17 @@ export async function getProducts(): Promise<Product[]> {
   return data;
 }
 
+export async function getProductsByCategory(category: string): Promise<Product[]> {
+  const url = `${API_BASE_URL}/products?category=${encodeURIComponent(category)}`;
+  const data = await fetchProductResponse(url);
+
+  if (!Array.isArray(data) || !data.every(isProduct)) {
+    throw new Error("Product API returned an invalid product list for category.");
+  }
+
+  return data;
+}
+
 export async function getProductById(id: number): Promise<Product | null> {
   const url = `${API_BASE_URL}/products/${encodeURIComponent(id)}`;
 
