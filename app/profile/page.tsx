@@ -23,9 +23,13 @@ export default async function ProfilePage() {
         
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <span aria-hidden="true" className="grid size-16 place-items-center rounded-full bg-[#e6f2e9] text-2xl text-[#176c45] font-bold">
-              {(user.name || user.email || "U").slice(0, 1).toUpperCase()}
-            </span>
+            {user.image ? (
+              <img src={user.image} alt="" className="size-16 rounded-full object-cover" />
+            ) : (
+              <span aria-hidden="true" className="grid size-16 place-items-center rounded-full bg-[#e6f2e9] text-2xl text-[#176c45] font-bold">
+                {(user.name || user.email || "U").slice(0, 1).toUpperCase()}
+              </span>
+            )}
             <div>
               <p className="text-xl font-bold text-[#203d2b] m-0">{user.name || "ব্যবহারকারী"}</p>
               <p className="text-sm text-bazaar-muted m-0 mt-1">{user.email}</p>

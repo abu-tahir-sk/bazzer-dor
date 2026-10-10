@@ -86,10 +86,14 @@ export default function Navbar() {
           ) : session?.user ? (
             <div className="flex items-center justify-end gap-2.5">
               <Link className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#294638] no-underline hover:text-bazaar-green" href="/profile">
-                <span aria-hidden="true" className="grid size-6 place-items-center rounded-full bg-[#e6f2e9] text-[#176c45]">
-                  {session.user.name.slice(0, 1)}
-                </span>
-                <span>{session.user.name}</span>
+                {session.user.image ? (
+                  <img src={session.user.image} alt="" className="size-6 rounded-full object-cover" />
+                ) : (
+                  <span aria-hidden="true" className="grid size-6 place-items-center rounded-full bg-[#e6f2e9] text-[#176c45]">
+                    {(session.user.name || session.user.email || "U").slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+                <span>{session.user.name || "ব্যবহারকারী"}</span>
               </Link>
               <button
                 className="inline-flex min-h-7 items-center justify-center rounded-md border-0 bg-transparent px-2.5 text-[10px] font-bold text-bazaar-ink hover:text-bazaar-green disabled:opacity-60"
