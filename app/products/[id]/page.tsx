@@ -11,6 +11,7 @@ import {
 } from "../../lib/products";
 
 
+export const instant = false;
 
 async function ProductDetail({
   params,
