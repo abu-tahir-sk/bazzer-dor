@@ -22,7 +22,7 @@ export default async function EditProfilePage() {
         <h1 className="text-2xl font-extrabold text-[#25372c]">তথ্য আপডেট করুন</h1>
         <p className="mt-2 text-sm text-bazaar-muted">আপনার নাম পরিবর্তন করতে পারবেন।</p>
         
-        <ProfileEditForm initialName={user.name} />
+        <ProfileEditForm initialName={user.name || ""} />
       </div>
     </main>
   );
