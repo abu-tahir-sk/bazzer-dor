@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "../../lib/auth";
 import { ProfileEditForm } from "./profile-edit-form";
 
-export const instant = false;
+
 
 export default async function EditProfilePage() {
   const session = await auth.api.getSession({

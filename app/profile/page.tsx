@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "../lib/auth";
 
-export const instant = false;
+
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession({
